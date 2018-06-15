@@ -1,0 +1,6 @@
+*.zip
+data/
+linux_*/
+__pycache__/
+run.sh
+mynotes.md
