@@ -4,3 +4,4 @@ linux_*/
 __pycache__/
 run.sh
 mynotes.md
+data_orig/

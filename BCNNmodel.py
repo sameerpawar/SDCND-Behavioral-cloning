@@ -1,5 +1,5 @@
 # Behavioral Cloning Neural Network model (BCNN)
-from keras.layers import Input, Flatten, Dense, Conv2D, Add, Lambda, Cropping2D
+from keras.layers import Input, Flatten, Dense, Conv2D, Add, Lambda, Cropping2D, MaxPooling2D
 from keras.models import Model
 
 
@@ -15,6 +15,43 @@ def BCNNet(input_shape):
     model = Model(inp, out)
     return model
 
+
+def LeNet(input_shape):
+    # Single layer dense network
+    inp   = Input(shape=input_shape)
+    cropped_inp   = Cropping2D(cropping=((50,20), (0,0)), input_shape=(160,320,3))(inp)
+    norm_inp = Lambda(lambda x: x/255.0 - 0.5)(cropped_inp)
+    
+    # convolution (5, 5, inputchannels, 6)
+    conv1 = Conv2D(6, 5, padding='valid', activation='relu')(norm_inp)
+    
+    # max pooling with stride-2
+    maxp2 = MaxPooling2D(pool_size=(2, 2))(conv1)
+
+    # convolution (5, 5, inputchannels, 16)
+    conv3 = Conv2D(16, 5, padding='valid', activation='relu')(maxp2)
+
+    # max pooling with stride-2
+    maxp4 = MaxPooling2D(pool_size=(2, 2))(conv3)
+
+
+    fc5_inp  = Flatten()(maxp4)
+    fc5  = Dense(120, activation='relu')(fc5_inp)
+    fc6  = Dense(84, activation='relu')(fc5)
+    out = Dense(1)(fc6)
+    model = Model(inp, out)
+    return model
+
+
+def BCNNet_nocrop(input_shape):
+    # Single layer dense network
+    inp   = Input(shape=input_shape)
+    norm_inp = Lambda(lambda x: x/255.0 - 0.5)(inp)
+    conv1 = Conv2D(16, 3, padding='same', activation='relu')(norm_inp)
+    fc3_inp  = Flatten()(conv1)
+    out = Dense(1)(fc3_inp)
+    model = Model(inp, out)
+    return model
 
 def BCNNet_3(X_data, y_data, epochs_var = 1, batch_size_var = 32, validation_split_var = 0.2):
     # Single layer dense network
