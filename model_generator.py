@@ -9,6 +9,8 @@ import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 from BCNNmodel import BCNNet
 
+FLIP = 1
+LRImages = 0
 
 #**************************************************************************************************************
 def generator(samples, batch_size=32):
@@ -20,52 +22,51 @@ def generator(samples, batch_size=32):
 
             images = []
             angles = []
+            correction = 0.2 # this is a parameter to tune
             for batch_sample in batch_samples:
                 name = './data/IMG/'+batch_sample[0].split('/')[-1]
                 center_image = cv2.imread(name)
                 center_angle = float(batch_sample[3])
-                # TODO append left and right images as well
                 images.append(center_image)
                 angles.append(center_angle)            
+
+                if FLIP:
+                    image_flipped = np.fliplr(center_image)
+                    angle_flipped = -center_angle
+                    images.append(image_flipped)
+                    angles.append(angle_flipped)
+
+                if LRImages:
+                    # append left and right images as well
+                    name = './data/IMG/'+batch_sample[1].split('/')[-1]
+                    left_image = cv2.imread(name)
+                    left_angle = center_angle + correction
+                    images.append(left_image)
+                    angles.append(left_angle)            
+                    if FLIP:        
+                        image_flipped = np.fliplr(left_image)
+                        angle_flipped = -left_angle
+                        images.append(image_flipped)
+                        angles.append(angle_flipped)
+
+                    name = './data/IMG/'+batch_sample[2].split('/')[-1]
+                    right_image = cv2.imread(name)
+                    right_angle = center_angle - correction
+                    images.append(right_image)
+                    angles.append(right_angle)            
+                    if FLIP:        
+                        image_flipped = np.fliplr(right_image)
+                        angle_flipped = -right_angle
+                        images.append(image_flipped)
+                        angles.append(angle_flipped)
             X_train = np.array(images)
             y_train = np.array(angles)
             yield sklearn.utils.shuffle(X_train, y_train)
 
 #**************************************************************************************************************
 
-def read_data_fun(nsamples = 1e12):
-    lines = []
-    samples = 0
-    with open('./data/driving_log.csv') as csvfile:
-        reader = csv.reader(csvfile)
-        ignore_header = True
-        for line in reader:
-            if ignore_header or samples > nsamples:
-                ignore_header = False
-            else:
-                lines.append(line)
-                samples += 1
 
 
-    images = [] # X_data
-    measurements = [] # Y_data
-
-    for line in lines:
-        source_path = line[0]
-        filename = source_path.split('/')[-1]
-        current_path = './data/IMG/' + filename
-        image = cv2.imread(current_path)
-        #image = ((image) - 128.0)/128.0
-        measurement = float(line[3])
-        images.append(image)
-        measurements.append(measurement)
-
-    X_data = np.array(images)[...,[2, 1, 0]]
-    y_data = np.array(measurements)
-
-    return X_data, y_data
-
-#**************************************************************************************************************
 
 
 flags = tf.app.flags
@@ -95,10 +96,10 @@ nsamples = np.minimum(FLAGS.total_samples,len(samples))
 samples = samples[:nsamples]    
 train_samples, validation_samples = train_test_split(samples, test_size=0.2)
 
+
 # Read the data
 print("epochs = ", FLAGS.epochs)
 print("batch size = ", FLAGS.batch_size)
-print("Training samples = ", len(train_samples))
 
 # compile and train the model using the generator function
 train_generator = generator(train_samples, FLAGS.batch_size)
