@@ -1,7 +1,10 @@
 *.zip
+*.h5
 data/
+examples/
 linux_*/
 __pycache__/
+__MACOSX/
 run.sh
 mynotes.md
 data_orig/
