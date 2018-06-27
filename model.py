@@ -134,7 +134,7 @@ FLAGS = flags.FLAGS
 # command line flags
 flags.DEFINE_string('model', 'LeNet', "Model selection.")
 flags.DEFINE_string('data', 'data', "training data folder.")
-flags.DEFINE_string('out', 'model.h5', "Output file name.")
+flags.DEFINE_string('out', 'out', "Output file name.")
 flags.DEFINE_integer('start_line', 0, "Starting of the line from excel.")
 flags.DEFINE_integer('end_line', 10**20, "Ending of the line from excel.")
 flags.DEFINE_integer('plot', 0, "The visualization flag.")
@@ -145,7 +145,7 @@ flags.DEFINE_integer('batch_size', 32, "The batch size.")
 flags.DEFINE_boolean('BN', False, "batch normalization.")
 flags.DEFINE_float('conv_drop', 0.0, "Drop rate for conv layers.")
 flags.DEFINE_float('fc_drop', 0.0, "Drop rate for fully connected layers.")
-flags.DEFINE_float('rate', 1e-3, "Learning rate for fully connected layers.")
+flags.DEFINE_float('rate', 1e-4, "Learning rate for fully connected layers.")
 
 FLIP = FLAGS.flip
 LRImages = FLAGS.LR
@@ -202,13 +202,21 @@ validation_steps = len(validation_samples),
 epochs=FLAGS.epochs, verbose=1)
 '''
 #**************************************************************************************************************
+outfilename = str(FLAGS.model)
+if FLAGS.BN:
+    outfilename = outfilename + '_' + str('BN')
 
+dropout = FLAGS.conv_drop + FLAGS.fc_drop
+if  dropout > 0:
+    outfilename = outfilename + '_' + str('dropout')
 
-model.save(FLAGS.out)
+outfilename = outfilename + '_' + str(FLAGS.out) + '.h5'
+
+model.save(outfilename)
 print("epochs = ", FLAGS.epochs)
 print("batch size = ", FLAGS.batch_size)
-print("Using model " + FLAGS.model)
-print("Output filename = " + FLAGS.out)
+print("Using model ", FLAGS.model)
+print("Output filename = ", outfilename)
 if FLIP:
     print("Flip enabled")
 if FLAGS.BN:
