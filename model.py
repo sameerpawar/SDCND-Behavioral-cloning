@@ -70,7 +70,7 @@ def read_data_fun(samples, src):
 
 
 #**************************************************************************************************************
-'''
+
 def generator(samples, batch_size=32):
     num_samples = len(samples)
     while 1: # Loop forever so the generator never terminates
@@ -124,7 +124,7 @@ def generator(samples, batch_size=32):
             y_train = np.array(angles)
             yield sklearn.utils.shuffle(X_train, y_train)
 
-'''
+
 #**************************************************************************************************************
 
 
@@ -183,24 +183,26 @@ model.compile(optimizer=optm, loss='mse')
 
 #**************************************************************************************************************
 # If no generator
+'''
 X_data, y_data = read_data_fun(samples, FLAGS.data)
 history_object = model.fit(x= X_data, y = y_data, batch_size = FLAGS.batch_size, 
 epochs = FLAGS.epochs,verbose=1, validation_split=0.2, shuffle=True)
-#**************************************************************************************************************
-
-
-#**************************************************************************************************************
 '''
+#**************************************************************************************************************
+
+
+#**************************************************************************************************************
 # If generator
+train_samples, validation_samples = train_test_split(samples, test_size=0.2)
 train_generator         = generator(train_samples, FLAGS.batch_size)
 validation_generator    = generator(validation_samples, FLAGS.batch_size)
 # Train a model
 history_object = model.fit_generator(train_generator, steps_per_epoch =
-len(train_samples), validation_data = 
+len(train_samples)//FLAGS.batch_size, validation_data = 
 validation_generator,
-validation_steps = len(validation_samples), 
+validation_steps = len(validation_samples)//FLAGS.batch_size, 
 epochs=FLAGS.epochs, verbose=1)
-'''
+
 #**************************************************************************************************************
 outfilename = str(FLAGS.model)
 if FLAGS.BN:
