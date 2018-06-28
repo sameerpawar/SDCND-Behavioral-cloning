@@ -88,6 +88,14 @@ def generator(samples, batch_size=32):
                 images.append(center_image)
                 angles.append(center_angle)            
 
+                if SHIFT:
+                    shift_v = np.random.uniform(-50,50,1)[0]
+                    M       = np.float32([[1,0,shift_v],[0,1,0]])
+                    shifted_img     = cv2.warpAffine(center_image,M,(320,160))
+                    shifted_angle   = center_angle + shift_v/1000
+                    images.append(shifted_img)
+                    angles.append(shifted_angle)            
+
                 if FLIP:
                     # Flip the center image
                     image_flipped = np.fliplr(center_image)
@@ -139,6 +147,7 @@ flags.DEFINE_integer('start_line', 0, "Starting of the line from excel.")
 flags.DEFINE_integer('end_line', 10**20, "Ending of the line from excel.")
 flags.DEFINE_integer('plot', 0, "The visualization flag.")
 flags.DEFINE_boolean('flip', False, "Flip images boolean.")
+flags.DEFINE_boolean('shift', False, "shift images horizontally.")
 flags.DEFINE_boolean('LR', False, "Add left-right images boolean.")
 flags.DEFINE_integer('epochs', 1, "The number of epochs.")
 flags.DEFINE_integer('batch_size', 32, "The batch size.")
@@ -149,6 +158,7 @@ flags.DEFINE_float('rate', 1e-4, "Learning rate for fully connected layers.")
 
 FLIP = FLAGS.flip
 LRImages = FLAGS.LR
+SHIFT = FLAGS.shift
 
 input_shape = (160, 320, 3)
 
