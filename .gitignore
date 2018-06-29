@@ -2,6 +2,7 @@
 *.h5
 data/
 examples/
+run_dropout_shift/
 linux_*/
 __pycache__/
 __MACOSX/
